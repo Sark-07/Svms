@@ -1,0 +1,14 @@
+*,::before,:after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+@font-face {
+  font-family: ethnocentric;
+  src: url("assets/ethnocentric-family_woff/ethnocentricrgit.woff");
+}
+@font-face {
+  font-family: wildeRide;
+  src: url('assets/ethnocentric-family_woff/wild-ride.regular.woff')
+}
