@@ -12,7 +12,7 @@ const Layout = (props: Props) => {
   return (
     <main className='relative w-full min-h-screen flex flex-col'>
       <Sidebar />
-      <div className='w-[calc(100%-5rem)] ml-auto'>
+      <div className='w-[calc(100%-5rem)] ml-auto min-h-screen flex flex-col'>
         <Header />
         <Outlet />
         <Footer />

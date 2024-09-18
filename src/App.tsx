@@ -6,6 +6,7 @@ import Error404 from './pages/Error/Error404'
 import Login from './auth/Login'
 import SignUp from './auth/SignUp'
 import Dashboard from './pages/Dashboard/Dashboard'
+import StampRequisition from './pages/StampRequisition/StampRequisition'
 
 type Props = {}
 
@@ -16,6 +17,7 @@ const App = (props: Props) => {
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard/>}/>
           <Route path='/dashboard' element={<Dashboard/>}/>
+          <Route path='/new-stamp-requisition' element={<StampRequisition/>}/>
         </Route>
           <Route path="auth" element={<Auth />}>
             <Route index element={<Login />} />

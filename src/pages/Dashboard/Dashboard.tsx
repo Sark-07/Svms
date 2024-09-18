@@ -36,9 +36,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ListFilter, File } from 'lucide-react'
 import HorizontalBarChart from '@/components/ui/charts/HorizontalBarChart'
+import { useNavigate} from 'react-router-dom'
 type Props = {}
 
 const Dashboard = (props: Props) => {
+    const navigate = useNavigate()
     return (
         <div className=' w-full px-8 py-4 flex gap-3'>
             <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2 w-[75%]">
@@ -54,13 +56,13 @@ const Dashboard = (props: Props) => {
                             </CardDescription>
                         </CardHeader>
                         <CardFooter>
-                            <Button>Create New Requisition</Button>
+                            <Button onClick={() => navigate('/new-stamp-requisition') }>Create New Requisition</Button>
                         </CardFooter>
                     </Card>
                     <Card x-chunk="dashboard-05-chunk-1">
                         <CardHeader className="pb-2">
                             <CardDescription>This Week</CardDescription>
-                            <CardTitle className="text-4xl">$1,329</CardTitle>
+                            <CardTitle className="text-4xl">₹1,329</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-xs text-muted-foreground">
@@ -74,7 +76,7 @@ const Dashboard = (props: Props) => {
                     <Card x-chunk="dashboard-05-chunk-2">
                         <CardHeader className="pb-2">
                             <CardDescription>This Month</CardDescription>
-                            <CardTitle className="text-4xl">$5,329</CardTitle>
+                            <CardTitle className="text-4xl">₹5,329</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-xs text-muted-foreground">
@@ -173,7 +175,7 @@ const Dashboard = (props: Props) => {
                                             <TableCell className="hidden md:table-cell">
                                                 2023-06-23
                                             </TableCell>
-                                            <TableCell className="text-right">$250.00</TableCell>
+                                            <TableCell className="text-right">₹250.00</TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell>
@@ -193,7 +195,7 @@ const Dashboard = (props: Props) => {
                                             <TableCell className="hidden md:table-cell">
                                                 2023-06-24
                                             </TableCell>
-                                            <TableCell className="text-right">$150.00</TableCell>
+                                            <TableCell className="text-right">₹150.00</TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell>
@@ -213,7 +215,7 @@ const Dashboard = (props: Props) => {
                                             <TableCell className="hidden md:table-cell">
                                                 2023-06-25
                                             </TableCell>
-                                            <TableCell className="text-right">$350.00</TableCell>
+                                            <TableCell className="text-right">₹350.00</TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell>
@@ -233,7 +235,7 @@ const Dashboard = (props: Props) => {
                                             <TableCell className="hidden md:table-cell">
                                                 2023-06-26
                                             </TableCell>
-                                            <TableCell className="text-right">$450.00</TableCell>
+                                            <TableCell className="text-right">₹450.00</TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell>
@@ -253,7 +255,7 @@ const Dashboard = (props: Props) => {
                                             <TableCell className="hidden md:table-cell">
                                                 2023-06-23
                                             </TableCell>
-                                            <TableCell className="text-right">$250.00</TableCell>
+                                            <TableCell className="text-right">₹250.00</TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell>
@@ -273,7 +275,7 @@ const Dashboard = (props: Props) => {
                                             <TableCell className="hidden md:table-cell">
                                                 2023-06-23
                                             </TableCell>
-                                            <TableCell className="text-right">$250.00</TableCell>
+                                            <TableCell className="text-right">₹250.00</TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell>
@@ -293,7 +295,7 @@ const Dashboard = (props: Props) => {
                                             <TableCell className="hidden md:table-cell">
                                                 2023-06-24
                                             </TableCell>
-                                            <TableCell className="text-right">$150.00</TableCell>
+                                            <TableCell className="text-right">₹150.00</TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell>
@@ -313,7 +315,7 @@ const Dashboard = (props: Props) => {
                                             <TableCell className="hidden md:table-cell">
                                                 2023-06-26
                                             </TableCell>
-                                            <TableCell className="text-right">$450.00</TableCell>
+                                            <TableCell className="text-right">₹450.00</TableCell>
                                         </TableRow>
                                     </TableBody>
                                 </Table>
