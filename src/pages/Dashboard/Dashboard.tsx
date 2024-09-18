@@ -40,7 +40,7 @@ import { useNavigate} from 'react-router-dom'
 type Props = {}
 
 const Dashboard = (props: Props) => {
-    const navigate = useNavigate()
+    const navigate: ReturnType<typeof useNavigate> = useNavigate()
     return (
         <div className=' w-full px-8 py-4 flex gap-3'>
             <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2 w-[75%]">
