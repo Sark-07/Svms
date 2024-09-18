@@ -3,12 +3,22 @@
   padding: 0;
   box-sizing: border-box;
 }
-
-@font-face {
-  font-family: ethnocentric;
-  src: url("assets/ethnocentric-family_woff/ethnocentricrgit.woff");
+::-webkit-scrollbar {
+  width: 7px;
 }
-@font-face {
-  font-family: wildeRide;
-  src: url('assets/ethnocentric-family_woff/wild-ride.regular.woff')
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #9b9b9b;
+  border-radius: 0.15em;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #7e7e7e;
 }
