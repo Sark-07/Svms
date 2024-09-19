@@ -56,7 +56,7 @@ const Dashboard = (props: Props) => {
                             </CardDescription>
                         </CardHeader>
                         <CardFooter>
-                            <Button onClick={() => navigate('/new-stamp-requisition') }>Create New Requisition</Button>
+                            <Button onClick={() => navigate('/dashboard/new-stamp-requisition') }>Create New Requisition</Button>
                         </CardFooter>
                     </Card>
                     <Card x-chunk="dashboard-05-chunk-1">

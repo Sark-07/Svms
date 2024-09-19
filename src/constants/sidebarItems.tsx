@@ -20,20 +20,20 @@ export const sidebarItems: MenuItems[] = [
         icon: <CirclePlus/>,
         title: 'Stamp Requisition',
         tooltip: 'Stamp Requisition',
-        routeTo: '/new-stamp-requisition'
+        routeTo: '/dashboard/new-stamp-requisition'
     },
     {
         id: 2,
         icon: <IndianRupee/>,
         title: 'Payments',
         tooltip: 'Payments',
-        routeTo: '/payments'
+        routeTo: '/dashboard/payments'
     },
     {
         id: 3,
         icon: <UserRound/>,
         title: 'Profile',
         tooltip: 'Profile',
-        routeTo: '/profile'
+        routeTo: '/dashboard/profile'
     },
 ]
