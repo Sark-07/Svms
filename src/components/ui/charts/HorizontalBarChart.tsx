@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 import {
@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
@@ -34,9 +33,9 @@ const chartConfig = {
     color: "hsl(var(--chart-2))",
   },
 } 
-type Props = {}
 
-const HorizontalBarChart = (props: Props) => {
+
+const HorizontalBarChart = () => {
   return (
     <Card className='w-full'>
       <CardHeader>

@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { Settings } from 'lucide-react'
 import {
   Tooltip,
@@ -10,7 +10,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { MenuItems, sidebarItems } from '@/constants/sidebarItems'
 
 
-const Sidebar = (props: any) => {
+const Sidebar = () => {
   const location = useLocation() as ReturnType<typeof useLocation>
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-20 flex-col border-r bg-background sm:flex">

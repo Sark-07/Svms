@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import {
@@ -12,16 +12,14 @@ import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
 import { Loader2 } from "lucide-react"
-type Props = {}
 
-const StampRequisition = (props: Props) => {
+const StampRequisition = () => {
   return (
     <div className='w-full h-full md:px-8 py-4 flex flex-col gap-4'>
       <div>

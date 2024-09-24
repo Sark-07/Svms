@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Layout from './shared/Layout'
 import Auth from './auth/Auth'
@@ -9,9 +9,9 @@ import Dashboard from './pages/Dashboard/Dashboard'
 import StampRequisition from './pages/StampRequisition/StampRequisition'
 import Home from './pages/Home/Home'
 
-type Props = {}
 
-const App = (props: Props) => {
+
+const App = () => {
   return (
     <BrowserRouter>
       <Routes>

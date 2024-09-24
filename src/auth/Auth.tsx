@@ -1,9 +1,8 @@
-import React from 'react'
-import Login from "./Login"
-import { Link, Outlet } from 'react-router-dom'
-type Props = {}
 
-const Auth = (props: Props) => {
+import { Link, Outlet } from 'react-router-dom'
+
+
+const Auth = () => {
     return (
         <div className="w-full lg:grid h-screen lg:grid-cols-2">
             <div className="flex items-center justify-center py-12 h-full relative">

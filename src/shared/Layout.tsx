@@ -1,14 +1,12 @@
-import React from 'react'
-import Navbar from './Navbar'
+
 import Footer from './Footer'
-import SidebarDialog from './SidebarDialog'
 import Sidebar from './Sidebar'
 import Header from './Header'
 import { Outlet } from 'react-router-dom'
 
-type Props = {}
 
-const Layout = (props: Props) => {
+
+const Layout = () => {
   return (
     <main className='relative w-full min-h-screen flex flex-col'>
       <Sidebar />

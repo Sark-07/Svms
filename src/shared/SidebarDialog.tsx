@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 
-type Props = {}
 
-const SidebarDialog = (props: Props) => {
+
+const SidebarDialog = () => {
   const [isOpen, setIsOpen] = useState(true)
 
   return (

@@ -1,7 +1,6 @@
-import React from 'react'
+
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
@@ -17,13 +16,12 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Input } from '@/components/ui/input'
-import { PanelLeft, Package2, Home, ShoppingCart, Package, Users2, LineChart, Search } from 'lucide-react'
+import { PanelLeft, Package2, Home, ShoppingCart, Package, Users2, LineChart,  } from 'lucide-react'
 import { Button } from 'primereact/button'
 import { Link } from 'react-router-dom'
-type Props = {}
 
-const Header = (props: Props) => {
+
+const Header = () => {
     return (
         <header className="sticky w-full top-0 ml-auto z-30 py-2 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:bg-transparent md:px-8">
             <Sheet>

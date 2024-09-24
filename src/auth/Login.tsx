@@ -1,4 +1,4 @@
-import React from 'react'
+
 import {Link} from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-type Props = {}
 
-const Login = (props: Props) => {
+
+const Login = () => {
   return (
     <Card className="mx-auto max-w-md w-[26rem]">
     <CardHeader>

@@ -1,5 +1,5 @@
 import { PieChartComponent } from '@/components/ui/charts/PieChartComponent'
-import React from 'react'
+
 import {
     Table,
     TableBody,
@@ -29,7 +29,6 @@ import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
-    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
@@ -37,9 +36,9 @@ import {
 import { ListFilter, File } from 'lucide-react'
 import HorizontalBarChart from '@/components/ui/charts/HorizontalBarChart'
 import { useNavigate} from 'react-router-dom'
-type Props = {}
 
-const Dashboard = (props: Props) => {
+
+const Dashboard = () => {
     const navigate: ReturnType<typeof useNavigate> = useNavigate()
     return (
         <div className=' w-full px-8 py-4 flex gap-3'>
