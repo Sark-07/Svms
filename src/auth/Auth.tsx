@@ -7,7 +7,7 @@ const Auth = (props: Props) => {
     return (
         <div className="w-full lg:grid h-screen lg:grid-cols-2">
             <div className="flex items-center justify-center py-12 h-full relative">
-                <Link to={'/'}><h1 className='absolute top-5 left-10 text-3xl font-bold font-ethnocentric bg-gradient-to-r from-blue-500 to-violet-500 text-transparent bg-clip-text'>SVMS</h1></Link>
+                <Link to={'/'}><h1 className='absolute top-4 left-10 text-3xl font-bold font-ethnocentric bg-gradient-to-r from-blue-500 to-violet-500 text-transparent bg-clip-text'>SVMS</h1></Link>
                 <Outlet />
             </div>
             <div className="hidden bg-muted lg:block">
