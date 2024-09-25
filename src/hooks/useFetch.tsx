@@ -1,12 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios, { AxiosRequestConfig } from 'axios';
-
-type ApiResponse<T> = {
-  apiResponseStatus: number;
-  message: string;
-  result: T[];
-};
-
+import { ApiResponse } from '@/types/types';
 const useFetch = <T,>(url: string, options?: AxiosRequestConfig) => {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);

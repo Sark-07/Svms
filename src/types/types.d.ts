@@ -3,3 +3,12 @@ export type ApiResponse<T> = {
     message: string;
     result: T[];
   };
+  export type VendorType = {
+    stampVendorId: string;
+    vendorType: string;
+    description: string;
+  }
+  export type Treasury = {
+    name: string;
+    code: string;
+  }

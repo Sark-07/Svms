@@ -21,9 +21,9 @@ import { Label } from "@/components/ui/label";
 import axios from 'axios';
 import { z } from 'zod';
 // import { zodResolver } from "@hookform/resolvers/zod"
-import useFetch from '@/hooks/useFetch';
-import { ApiResponse } from '@/types/types';
+import { ApiResponse, Treasury, VendorType } from '@/types/types';
 import { formatDate } from '@/utils/formatDate';
+import fetchData from '@/utils/fetcher';
 
 // Zod schema for form validation including file validation
 const vendorDetailsSchema = z.object({
@@ -50,21 +50,42 @@ const vendorDetailsSchema = z.object({
     .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), "Photo file type must be JPEG, JPG or PNG"),
 });
 
-interface VendorType {
-  stampVendorId: string;
-  vendorType: string;
-  description: string;
-}
-interface Treasury {
-  name: string;
-  code: string;
-}
+
 
 
 const SignUp = () => {
+  const [vendorLoading, setVendorLoading] = useState(false);
+  const [vendorData, setVendorData] = useState<VendorType[] | null>(null);
+  const [vendorError, setVendorError] = useState<string | null>(null);
+  const [treasuryLoading, setTreasuryLoading] = useState(false);
+  const [treasryData, setTreasuryData] = useState<Treasury[] | null>(null);
+  const [treasuryError, setTreasuryError] = useState<string | null>(null);
 
-  const { data: vendorTypes, loading: vendorTypeLoading, error: vendorTypeError } = useFetch<VendorType>(`${import.meta.env.VITE_SERVER_URL}StampMaster/GetALLStampVendorTypes`);
-  const { data: treasuries, loading: treassuryLoading, error: treasuryError } = useFetch<Treasury>(`${import.meta.env.VITE_SERVER_URL}Master/get-treasuries`);
+  const handleVendorDropdown = async () => {
+    if (!vendorData) {
+      const { data, error } = await fetchData<VendorType>(`${import.meta.env.VITE_SERVER_URL}StampMaster/GetALLStampVendorTypes`, setVendorLoading); // Pass setLoading to fetchData
+      console.log(data);
+      if (error) {
+        setVendorError(error);
+        console.error("Error fetching data:", error);
+      } else {
+        setVendorData(data);
+      }
+    }
+  }
+  const handleTreasuryDropdown = async () => {
+    if (!treasryData) {
+      const { data, error } = await fetchData<Treasury>(`${import.meta.env.VITE_SERVER_URL}Master/get-treasuries`, setTreasuryLoading); // Pass setLoading to fetchData
+      console.log(data);
+      if (error) {
+        setTreasuryError(error);
+        console.error("Error fetching data:", error);
+      } else {
+        setTreasuryData(data);
+      }
+    }
+  }
+
   const [formData, setFormData] = useState({
     vendorName: '',
     panNumber: '',
@@ -80,7 +101,7 @@ const SignUp = () => {
     vendorPhoto: null,
   });
 
-  const [formErrors, setFormErrors] = useState<any>({});  
+  const [formErrors, setFormErrors] = useState<any>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
@@ -111,7 +132,7 @@ const SignUp = () => {
     formData.validUpto = formatDate(formData.validUpto)
     for (const key in formData) {
       console.log((formData as any)['effectiveFrom']);
-      
+
       formDataToSubmit.append(key, (formData as any)[key]);
     }
     try {
@@ -227,42 +248,38 @@ const SignUp = () => {
             <div className='flex gap-4 items-start'>
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="vendor-type">Vendor Type</Label>
-                {vendorTypeLoading && <p className='text-sm mt-2'>Loading vendor types...</p>}
-                {vendorTypeError && <p className='text-sm text-red-500'>Error loading vendor types: {vendorTypeError}</p>}
-                {vendorTypes && (
-                  <Select onValueChange={(value) => setFormData({ ...formData, vendorType: Number(value) })}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select Vendor Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {vendorTypes.map((vendorType) => (
-                        <SelectItem key={vendorType.stampVendorId} value={vendorType.stampVendorId.toString()}>
-                          {vendorType.description}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                {vendorLoading && <p className='text-sm mt-2'>Loading vendor types...</p>}
+                {vendorError && <p className='text-sm text-red-500'>Error loading vendor types: {vendorError}</p>}
+                <Select onValueChange={(value) => setFormData({ ...formData, vendorType: Number(value) })} onOpenChange={handleVendorDropdown}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Vendor Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vendorData?.map((vendorType) => (
+                      <SelectItem key={vendorType.stampVendorId} value={vendorType.stampVendorId.toString()}>
+                        {vendorType.description}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {formErrors.vendorType && <p className="text-red-500 text-xs">{formErrors.vendorType._errors[0]}</p>}
               </div>
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="vendor-type">Treasury</Label>
-                {treassuryLoading && <p className='text-sm mt-2'>Loading treasuries...</p>}
+                {treasuryLoading && <p className='text-sm mt-2'>Loading treasuries...</p>}
                 {treasuryError && <p className='text-sm text-red-500 mt-2'>Error loading treasuries: {treasuryError}</p>}
-                {vendorTypes && (
-                  <Select onValueChange={(value) => setFormData({ ...formData, treasury: value })}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select Treasury" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {treasuries?.map((treasury) => (
-                        <SelectItem key={treasury.code} value={treasury.code}>
-                          {treasury.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                <Select onValueChange={(value) => setFormData({ ...formData, treasury: value })} onOpenChange={handleTreasuryDropdown}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Treasury" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {treasryData?.map((treasury) => (
+                      <SelectItem key={treasury.code} value={treasury.code}>
+                        {treasury.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {formErrors.treasury && <p className="text-red-500 text-xs">{formErrors.treasury._errors[0]}</p>}
               </div>
             </div>
