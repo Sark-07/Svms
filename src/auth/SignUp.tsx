@@ -1,141 +1,119 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { toast, Bounce } from 'react-toastify'
-import { Button } from "@/components/ui/button";
+import { toast, Bounce } from 'react-toastify';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import axios from 'axios';
 import { z } from 'zod';
-// import { zodResolver } from "@hookform/resolvers/zod"
+import { zodResolver } from '@hookform/resolvers/zod';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { ApiResponse, Treasury, VendorType } from '@/types/types';
 import { formatDate } from '@/utils/formatDate';
 import fetchData from '@/utils/fetcher';
 
 // Zod schema for form validation including file validation
 const vendorDetailsSchema = z.object({
-  vendorName: z.string().min(1, "Vendor Name is required"),
-  panNumber: z.string().min(10, "Pan No must be exactly 10 characters").max(10, "Pan No must be exactly 10 characters"),
-  licenseNo: z.string().min(5, "License Number is required and minimum 5 characters long"),
-  phoneNumber: z.string().min(10, "Phone number must be exactly 10 digits").max(10, "Phone number must be exactly 10 digits"),
-  address: z.string().min(1, "Address is required"),
-  effectiveFrom: z.string().min(1, "Effective From date is required"),
-  validUpto: z.string().min(1, "Valid Upto date is required"),
-  vendorType: z.number().min(1, "Vendor Type is required"),
+  vendorName: z.string().min(1, 'Vendor Name is required'),
+  panNumber: z.string().length(10, 'Pan No must be exactly 10 characters'),
+  licenseNo: z.string().min(5, 'License Number is required and minimum 5 characters long'),
+  phoneNumber: z.string().length(10, 'Phone number must be exactly 10 digits'),
+  address: z.string().min(1, 'Address is required'),
+  effectiveFrom: z.string().min(1, 'Effective From date is required'),
+  validUpto: z.string().min(1, 'Valid Upto date is required'),
+  vendorType: z.number().min(1, 'Vendor Type is required'),
   treasury: z.string().length(3, 'Treasury is required'),
   vendorPanPhoto: z
     .instanceof(File)
-    .refine((file) => file.size <= 1024 * 1024, "Pan file size must be less than 1MB")
-    .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), "Pan file type must be JPEG, JPG or PNG"),
+    .refine((file) => file.size <= 1024 * 1024, 'Pan file size must be less than 1MB')
+    .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), 'Pan file type must be JPEG, JPG, or PNG'),
   vendorLicensePhoto: z
     .instanceof(File)
-    .refine((file) => file.size <= 1024 * 1024, "License file size must be less than 1MB")
-    .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), "License file type must be JPEG, JPG or PNG"),
+    .refine((file) => file.size <= 1024 * 1024, 'License file size must be less than 1MB')
+    .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), 'License file type must be JPEG, JPG, or PNG'),
   vendorPhoto: z
     .instanceof(File)
-    .refine((file) => file.size <= 1024 * 1024, "Photo file size must be less than 1MB")
-    .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), "Photo file type must be JPEG, JPG or PNG"),
+    .refine((file) => file.size <= 1024 * 1024, 'Photo file size must be less than 1MB')
+    .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), 'Photo file type must be JPEG, JPG, or PNG'),
 });
 
-
-
+type FormFields = z.infer<typeof vendorDetailsSchema>;
 
 const SignUp = () => {
   const [vendorLoading, setVendorLoading] = useState(false);
   const [vendorData, setVendorData] = useState<VendorType[] | null>(null);
   const [vendorError, setVendorError] = useState<string | null>(null);
   const [treasuryLoading, setTreasuryLoading] = useState(false);
-  const [treasryData, setTreasuryData] = useState<Treasury[] | null>(null);
+  const [treasuryData, setTreasuryData] = useState<Treasury[] | null>(null);
   const [treasuryError, setTreasuryError] = useState<string | null>(null);
+
+  const {
+    register,
+    setError,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormFields>({ resolver: zodResolver(vendorDetailsSchema) });
 
   const handleVendorDropdown = async () => {
     if (!vendorData) {
-      const { data, error } = await fetchData<VendorType>(`${import.meta.env.VITE_SERVER_URL}StampMaster/GetALLStampVendorTypes`, setVendorLoading); // Pass setLoading to fetchData
-      console.log(data);
+      const { data, error } = await fetchData<VendorType>(
+        `${import.meta.env.VITE_SERVER_URL}StampMaster/GetALLStampVendorTypes`,
+        setVendorLoading
+      );
       if (error) {
         setVendorError(error);
-        console.error("Error fetching data:", error);
+        console.error('Error fetching vendor data:', error);
       } else {
         setVendorData(data);
       }
     }
-  }
+  };
+
   const handleTreasuryDropdown = async () => {
-    if (!treasryData) {
-      const { data, error } = await fetchData<Treasury>(`${import.meta.env.VITE_SERVER_URL}Master/get-treasuries`, setTreasuryLoading); // Pass setLoading to fetchData
-      console.log(data);
+    if (!treasuryData) {
+      const { data, error } = await fetchData<Treasury>(
+        `${import.meta.env.VITE_SERVER_URL}Master/get-treasuries`,
+        setTreasuryLoading
+      );
       if (error) {
         setTreasuryError(error);
-        console.error("Error fetching data:", error);
+        console.error('Error fetching treasury data:', error);
       } else {
         setTreasuryData(data);
       }
     }
-  }
-
-  const [formData, setFormData] = useState({
-    vendorName: '',
-    panNumber: '',
-    licenseNo: '',
-    phoneNumber: 0,
-    address: '',
-    effectiveFrom: '',
-    validUpto: '',
-    vendorType: 0,
-    treasury: '',
-    vendorPanPhoto: null,
-    vendorLicensePhoto: null,
-    vendorPhoto: null,
-  });
-
-  const [formErrors, setFormErrors] = useState<any>({});
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { id, value } = e.target;
-
-    if (e.target instanceof HTMLInputElement && e.target.type === 'file') {
-      const files = e.target.files;
-      if (files && files.length > 0) {
-        setFormData((prev) => ({ ...prev, [id]: files[0] })); // Handle file input
-      }
-    } else {
-      setFormData((prev) => ({ ...prev, [id]: value })); // Handle text input and select inputs
-    }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const parsed = vendorDetailsSchema.safeParse(formData);
-
-    if (!parsed.success) {
-      const errors = parsed.error.format();
-      setFormErrors(errors);
-      return;
-    }
-
-    const formDataToSubmit = new FormData();
-    formData.effectiveFrom = formatDate(formData.effectiveFrom)
-    formData.validUpto = formatDate(formData.validUpto)
-    for (const key in formData) {
-      console.log((formData as any)['effectiveFrom']);
-
-      formDataToSubmit.append(key, (formData as any)[key]);
-    }
+  const onSubmit: SubmitHandler<FormFields> = async (formData: FormFields) => {
     try {
+      const formDataToSubmit = new FormData();
+      formData.effectiveFrom = formatDate(formData.effectiveFrom);
+      formData.validUpto = formatDate(formData.validUpto);
+      Object.entries(formData).forEach(([key, value]) => {
+        if (typeof value === 'number') {
+          formDataToSubmit.append(key, value.toString());
+        } else if (value instanceof File) {
+          formDataToSubmit.append(key, value);
+        } else {
+          formDataToSubmit.append(key, value as string);
+        }
+      });
+
+      // Now submit the FormData
       const { data: response } = await axios.post<ApiResponse<boolean>>(
         `${import.meta.env.VITE_SERVER_URL}StampVendor/CreateStampVendor`,
         formDataToSubmit,
@@ -146,35 +124,40 @@ const SignUp = () => {
           },
         }
       );
-      if (response.apiResponseStatus == 1) {
+
+      // Handle the response
+      if (response.apiResponseStatus === 1) {
         toast.success(response.message, {
-          position: "top-right",
+          position: 'top-right',
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "dark",
+          theme: 'dark',
           transition: Bounce,
-        })
+        });
       } else {
+        setError('root', { message: response.message });
         toast.error(response.message, {
-          position: "top-right",
+          position: 'top-right',
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "dark",
+          theme: 'dark',
           transition: Bounce,
-        })
+        });
       }
     } catch (error) {
-      console.error("Error submitting form", error);
+      setError('root', { message: 'Error submitting form' });
+      console.error('Error submitting form', error);
     }
   };
+
 
   return (
     <Card className="mx-auto w-[40rem]">
@@ -182,111 +165,124 @@ const SignUp = () => {
         <CardTitle className="text-3xl font-bold">Vendor Details Entry</CardTitle>
         <CardDescription>Enter your information to create an account</CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent>
           <div className="flex flex-col gap-4">
+            {/* Vendor Name & Photo */}
             <div className="flex gap-4 items-start">
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="vendorName">Vendor Name</Label>
-                <Input id="vendorName" placeholder="Enter Vendor Name" onChange={handleInputChange} />
-                {formErrors.vendorName && <p className="text-red-500 text-xs">{formErrors.vendorName._errors[0]}</p>}
+                <Input {...register('vendorName')} id="vendorName" placeholder="Enter Vendor Name" />
+                {errors.vendorName && <p className="text-red-500 text-xs">{errors.vendorName.message}</p>}
               </div>
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="vendorPhoto">Upload Photo</Label>
-                <Input id="vendorPhoto" type="file" accept=".jpg,.jpeg,.png" onChange={handleInputChange} />
-                {formErrors.vendorPhoto && <p className="text-red-500 text-xs">{formErrors.vendorPhoto._errors[0]}</p>}
+                <Input ref={register} id="vendorPhoto" name='vendorPhoto' type="file" accept=".jpg,.jpeg,.png" />
+                {errors.vendorPhoto && <p className="text-red-500 text-xs">{errors.vendorPhoto.message}</p>}
               </div>
             </div>
-            <div className='flex gap-4 items-start'>
+
+            {/* PAN & License Number */}
+            <div className="flex gap-4 items-start">
               <div className="grid gap-2 flex-1">
-                <Label htmlFor="pan-no">Pan No</Label>
-                <Input id="panNumber" placeholder="Eg: ABCDE1234F" onChange={handleInputChange} />
-                {formErrors.panNumber && <p className="text-red-500 text-xs">{formErrors.panNumber._errors[0]}</p>}
+                <Label htmlFor="panNumber">Pan No</Label>
+                <Input {...register('panNumber')} id="panNumber" placeholder="Eg: ABCDE1234F" />
+                {errors.panNumber && <p className="text-red-500 text-xs">{errors.panNumber.message}</p>}
               </div>
               <div className="grid gap-2 flex-1">
-                <Label htmlFor="license-number">License Number</Label>
-                <Input id="licenseNo" placeholder="Eg: LIC123457" onChange={handleInputChange} />
-                {formErrors.licenseNo && <p className="text-red-500 text-xs">{formErrors.licenseNo._errors[0]}</p>}
-              </div>
-            </div>
-            <div className='flex gap-4 items-start'>
-              <div className="grid gap-2 flex-1">
-                <Label htmlFor="upload-pan">Upload Pan</Label>
-                <Input id="vendorPanPhoto" type="file" accept=".jpg,.jpeg,.png" onChange={handleInputChange} />
-                {formErrors.vendorPanPhoto && <p className="text-red-500 text-xs">{formErrors.vendorPanPhoto._errors[0]}</p>}
-              </div>
-              <div className="grid gap-2 flex-1">
-                <Label htmlFor="upload-license">Upload License</Label>
-                <Input id="vendorLicensePhoto" type="file" accept=".jpg,.jpeg,.png" onChange={handleInputChange} />
-                {formErrors.vendorLicensePhoto && <p className="text-red-500 text-xs">{formErrors.vendorLicensePhoto._errors[0]}</p>}
+                <Label htmlFor="licenseNo">License Number</Label>
+                <Input {...register('licenseNo')} id="licenseNo" placeholder="Eg: LIC123457" />
+                {errors.licenseNo && <p className="text-red-500 text-xs">{errors.licenseNo.message}</p>}
               </div>
             </div>
-            <div className='flex gap-4 items-start'>
+
+            {/* PAN & License Photo */}
+            <div className="flex gap-4 items-start">
+              <div className="grid gap-2 flex-1">
+                <Label htmlFor="vendorPanPhoto">Upload Pan</Label>
+                <Input {...register('vendorPanPhoto')} id="vendorPanPhoto" type="file" accept=".jpg,.jpeg,.png" />
+                {errors.vendorPanPhoto && <p className="text-red-500 text-xs">{errors.vendorPanPhoto.message}</p>}
+              </div>
+              <div className="grid gap-2 flex-1">
+                <Label htmlFor="vendorLicensePhoto">Upload License</Label>
+                <Input {...register('vendorLicensePhoto')} id="vendorLicensePhoto" type="file" accept=".jpg,.jpeg,.png" />
+                {errors.vendorLicensePhoto && <p className="text-red-500 text-xs">{errors.vendorLicensePhoto.message}</p>}
+              </div>
+            </div>
+
+            {/* Phone Number & Address */}
+            <div className="flex gap-4 items-start">
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="phoneNumber">Phone Number</Label>
-                <Input id="phoneNumber" placeholder="Eg: 1234567891" onChange={handleInputChange} />
-                {formErrors.phoneNumber && <p className="text-red-500 text-xs">{formErrors.phoneNumber._errors[0]}</p>}
+                <Input {...register('phoneNumber')} id="phoneNumber" placeholder="Eg: 9876543210" />
+                {errors.phoneNumber && <p className="text-red-500 text-xs">{errors.phoneNumber.message}</p>}
               </div>
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="address">Address</Label>
-                <Input id="address" placeholder="Eg: 20, ABC Road. New Delhi." onChange={handleInputChange} />
-                {formErrors.address && <p className="text-red-500 text-xs">{formErrors.address._errors[0]}</p>}
+                <Input {...register('address')} id="address" placeholder="Enter Address" />
+                {errors.address && <p className="text-red-500 text-xs">{errors.address.message}</p>}
               </div>
             </div>
-            <div className='flex gap-4 items-start'>
+
+            {/* Effective From & Valid Upto */}
+            <div className="flex gap-4 items-start">
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="effectiveFrom">Effective From</Label>
-                <Input id="effectiveFrom" type="date" onChange={handleInputChange} />
-                {formErrors.effectiveFrom && <p className="text-red-500 text-xs">{formErrors.effectiveFrom._errors[0]}</p>}
+                <Input {...register('effectiveFrom')} id="effectiveFrom" type="date" />
+                {errors.effectiveFrom && <p className="text-red-500 text-xs">{errors.effectiveFrom.message}</p>}
               </div>
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="validUpto">Valid Upto</Label>
-                <Input id="validUpto" type="date" onChange={handleInputChange} />
-                {formErrors.validUpto && <p className="text-red-500 text-xs">{formErrors.validUpto._errors[0]}</p>}
+                <Input {...register('validUpto')} id="validUpto" type="date" />
+                {errors.validUpto && <p className="text-red-500 text-xs">{errors.validUpto.message}</p>}
               </div>
             </div>
-            <div className='flex gap-4 items-start'>
+
+            {/* Vendor Type & Treasury */}
+            <div className="flex gap-4 items-start">
               <div className="grid gap-2 flex-1">
-                <Label htmlFor="vendor-type">Vendor Type</Label>
-                {vendorLoading && <p className='text-sm mt-2'>Loading vendor types...</p>}
-                {vendorError && <p className='text-sm text-red-500'>Error loading vendor types: {vendorError}</p>}
-                <Select onValueChange={(value) => setFormData({ ...formData, vendorType: Number(value) })} onOpenChange={handleVendorDropdown}>
-                  <SelectTrigger className="w-full">
+                <Label htmlFor="vendorType">Vendor Type</Label>
+                <Select onOpenChange={handleVendorDropdown}>
+                  <SelectTrigger>
                     <SelectValue placeholder="Select Vendor Type" />
                   </SelectTrigger>
                   <SelectContent>
                     {vendorData?.map((vendorType) => (
-                      <SelectItem key={vendorType.stampVendorId} value={vendorType.stampVendorId.toString()}>
-                        {vendorType.description}
+                      <SelectItem key={vendorType.stampVendorId} value={String(vendorType.stampVendorId)}>
+                        {vendorType.vendorType}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {formErrors.vendorType && <p className="text-red-500 text-xs">{formErrors.vendorType._errors[0]}</p>}
+                {vendorLoading && <p className='text-sm'>Loading vendor types...</p>}
+                {vendorError && <p className="text-red-500 text-xs">{vendorError}</p>}
+                {errors.vendorType && <p className="text-red-500 text-xs">{errors.vendorType.message}</p>}
               </div>
               <div className="grid gap-2 flex-1">
-                <Label htmlFor="vendor-type">Treasury</Label>
-                {treasuryLoading && <p className='text-sm mt-2'>Loading treasuries...</p>}
-                {treasuryError && <p className='text-sm text-red-500 mt-2'>Error loading treasuries: {treasuryError}</p>}
-                <Select onValueChange={(value) => setFormData({ ...formData, treasury: value })} onOpenChange={handleTreasuryDropdown}>
-                  <SelectTrigger className="w-full">
+                <Label htmlFor="treasury">Treasury</Label>
+                <Select onOpenChange={handleTreasuryDropdown}>
+                  <SelectTrigger>
                     <SelectValue placeholder="Select Treasury" />
                   </SelectTrigger>
                   <SelectContent>
-                    {treasryData?.map((treasury) => (
-                      <SelectItem key={treasury.code} value={treasury.code}>
+                    {treasuryData?.map((treasury) => (
+                      <SelectItem key={treasury.code} value={String(treasury.code)}>
                         {treasury.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {formErrors.treasury && <p className="text-red-500 text-xs">{formErrors.treasury._errors[0]}</p>}
+                {treasuryLoading && <p className='text-sm'>Loading treasuries...</p>}
+                {treasuryError && <p className="text-red-500 text-xs">{treasuryError}</p>}
+                {errors.treasury && <p className="text-red-500 text-xs">{errors.treasury.message}</p>}
               </div>
             </div>
-            <Button type="submit" className="py-5 w-full mt-4">
-              Submit
-            </Button>
           </div>
+          <Button disabled={isSubmitting} type="submit" className="py-5 w-full mt-4">
+            {isSubmitting ? 'Loading...' : 'Submit'}
+          </Button>
+          {/* General Form Error */}
+          {errors.root?.message && <p className="text-red-500 text-xs mt-2">{errors.root.message}</p>}
           <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link to="/auth/login" className="underline">
