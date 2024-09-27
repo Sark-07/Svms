@@ -29,26 +29,29 @@ import fetchData from '@/utils/fetcher';
 // Zod schema for form validation including file validation
 const vendorDetailsSchema = z.object({
   vendorName: z.string().min(1, 'Vendor Name is required'),
-  panNumber: z.string().length(10, 'Pan No must be exactly 10 characters'),
+  panNumber: z.string().length(10, 'Pan No must be exactly 10 characters').regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
   licenseNo: z.string().min(5, 'License Number is required and minimum 5 characters long'),
-  phoneNumber: z.string().length(10, 'Phone number must be exactly 10 digits'),
+  phoneNumber: z.string().length(10, 'Phone number must be exactly 10 digits').regex(/^[6-9]\d{9}$/, 'Invalid phone number format'),
   address: z.string().min(1, 'Address is required'),
   effectiveFrom: z.string().min(1, 'Effective From date is required'),
   validUpto: z.string().min(1, 'Valid Upto date is required'),
-  vendorType: z.number().min(1, 'Vendor Type is required'),
-  treasury: z.string().length(3, 'Treasury is required'),
+  vendorType: z.string().min(1, 'Vendor Type is required'),
+  treasury: z.string().min(1, 'Treasury is required'),
   vendorPanPhoto: z
-    .instanceof(File)
-    .refine((file) => file.size <= 1024 * 1024, 'Pan file size must be less than 1MB')
-    .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), 'Pan file type must be JPEG, JPG, or PNG'),
-  vendorLicensePhoto: z
-    .instanceof(File)
-    .refine((file) => file.size <= 1024 * 1024, 'License file size must be less than 1MB')
-    .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), 'License file type must be JPEG, JPG, or PNG'),
-  vendorPhoto: z
-    .instanceof(File)
-    .refine((file) => file.size <= 1024 * 1024, 'Photo file size must be less than 1MB')
-    .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), 'Photo file type must be JPEG, JPG, or PNG'),
+  .instanceof(File)
+  .refine((file: File) => !!file, "File is required") // Ensure a file exists
+  .refine((file) => file.size <= 1024 * 1024, 'Pan file size must be less than 1MB')
+  .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), 'Pan file type must be JPEG, JPG, or PNG'),
+vendorLicensePhoto: z
+  .instanceof(File)
+  .refine((file: File) => !!file, "File is required") // Ensure a file exists
+  .refine((file) => file.size <= 1024 * 1024, 'License file size must be less than 1MB')
+  .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), 'License file type must be JPEG, JPG, or PNG'),
+vendorPhoto: z
+  .instanceof(File)
+  .refine((file: File) => !!file, "File is required") // Ensure a file exists
+  .refine((file) => file.size <= 1024 * 1024, 'Photo file size must be less than 1MB')
+  .refine((file) => ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type), 'Photo file type must be JPEG, JPG, or PNG'),
 });
 
 type FormFields = z.infer<typeof vendorDetailsSchema>;
@@ -63,10 +66,20 @@ const SignUp = () => {
 
   const {
     register,
+    setValue,
+    trigger,
     setError,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormFields>({ resolver: zodResolver(vendorDetailsSchema) });
+
+  // File handlers
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof FormFields) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setValue(fieldName, file);
+    }
+  };
 
   const handleVendorDropdown = async () => {
     if (!vendorData) {
@@ -79,6 +92,7 @@ const SignUp = () => {
         console.error('Error fetching vendor data:', error);
       } else {
         setVendorData(data);
+        setVendorError(error);
       }
     }
   };
@@ -94,6 +108,7 @@ const SignUp = () => {
         console.error('Error fetching treasury data:', error);
       } else {
         setTreasuryData(data);
+        setTreasuryError(error);
       }
     }
   };
@@ -104,9 +119,7 @@ const SignUp = () => {
       formData.effectiveFrom = formatDate(formData.effectiveFrom);
       formData.validUpto = formatDate(formData.validUpto);
       Object.entries(formData).forEach(([key, value]) => {
-        if (typeof value === 'number') {
-          formDataToSubmit.append(key, value.toString());
-        } else if (value instanceof File) {
+        if (value instanceof File) {
           formDataToSubmit.append(key, value);
         } else {
           formDataToSubmit.append(key, value as string);
@@ -158,7 +171,6 @@ const SignUp = () => {
     }
   };
 
-
   return (
     <Card className="mx-auto w-[40rem]">
       <CardHeader>
@@ -177,8 +189,8 @@ const SignUp = () => {
               </div>
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="vendorPhoto">Upload Photo</Label>
-                <Input ref={register} id="vendorPhoto" name='vendorPhoto' type="file" accept=".jpg,.jpeg,.png" />
-                {errors.vendorPhoto && <p className="text-red-500 text-xs">{errors.vendorPhoto.message}</p>}
+                <Input id="vendorPhoto" name='vendorPhoto' type="file" accept=".jpg,.jpeg,.png" onChange={(e) => { handleFileChange(e, 'vendorPhoto'), trigger('vendorPhoto') }} />
+                {errors.vendorPhoto && <p className="text-red-500 text-xs">{String(errors.vendorPhoto.message)}</p>}
               </div>
             </div>
 
@@ -200,13 +212,13 @@ const SignUp = () => {
             <div className="flex gap-4 items-start">
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="vendorPanPhoto">Upload Pan</Label>
-                <Input {...register('vendorPanPhoto')} id="vendorPanPhoto" type="file" accept=".jpg,.jpeg,.png" />
-                {errors.vendorPanPhoto && <p className="text-red-500 text-xs">{errors.vendorPanPhoto.message}</p>}
+                <Input id="vendorPanPhoto" type="file" accept=".jpg,.jpeg,.png" onChange={(e) => { handleFileChange(e, 'vendorPanPhoto'), trigger('vendorPanPhoto') }} />
+                {errors.vendorPanPhoto && <p className="text-red-500 text-xs">{String(errors.vendorPanPhoto.message)}</p>}
               </div>
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="vendorLicensePhoto">Upload License</Label>
-                <Input {...register('vendorLicensePhoto')} id="vendorLicensePhoto" type="file" accept=".jpg,.jpeg,.png" />
-                {errors.vendorLicensePhoto && <p className="text-red-500 text-xs">{errors.vendorLicensePhoto.message}</p>}
+                <Input id="vendorLicensePhoto" type="file" accept=".jpg,.jpeg,.png" onChange={(e) => { handleFileChange(e, 'vendorLicensePhoto'), trigger('vendorLicensePhoto') }} />
+                {errors.vendorLicensePhoto && <p className="text-red-500 text-xs">{String(errors.vendorLicensePhoto.message)}</p>}
               </div>
             </div>
 
@@ -214,7 +226,7 @@ const SignUp = () => {
             <div className="flex gap-4 items-start">
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="phoneNumber">Phone Number</Label>
-                <Input {...register('phoneNumber')} id="phoneNumber" placeholder="Eg: 9876543210" />
+                <Input {...register('phoneNumber')} id="phoneNumber" placeholder="Enter Phone Number" />
                 {errors.phoneNumber && <p className="text-red-500 text-xs">{errors.phoneNumber.message}</p>}
               </div>
               <div className="grid gap-2 flex-1">
@@ -242,25 +254,26 @@ const SignUp = () => {
             <div className="flex gap-4 items-start">
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="vendorType">Vendor Type</Label>
-                <Select onOpenChange={handleVendorDropdown}>
+                <Select onOpenChange={handleVendorDropdown} onValueChange={(value) => { setValue('vendorType', value), trigger('vendorType') }}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select Vendor Type" />
                   </SelectTrigger>
                   <SelectContent>
                     {vendorData?.map((vendorType) => (
                       <SelectItem key={vendorType.stampVendorId} value={String(vendorType.stampVendorId)}>
-                        {vendorType.vendorType}
+                        {vendorType.description}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {vendorLoading && <p className='text-sm'>Loading vendor types...</p>}
+                {vendorLoading && <p className="text-sm">Loading vendor types...</p>}
                 {vendorError && <p className="text-red-500 text-xs">{vendorError}</p>}
                 {errors.vendorType && <p className="text-red-500 text-xs">{errors.vendorType.message}</p>}
               </div>
+
               <div className="grid gap-2 flex-1">
                 <Label htmlFor="treasury">Treasury</Label>
-                <Select onOpenChange={handleTreasuryDropdown}>
+                <Select onOpenChange={handleTreasuryDropdown} onValueChange={(value) => { setValue('treasury', value), trigger('treasury') }}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select Treasury" />
                   </SelectTrigger>
@@ -272,16 +285,15 @@ const SignUp = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                {treasuryLoading && <p className='text-sm'>Loading treasuries...</p>}
+                {treasuryLoading && <p className="text-sm">Loading treasuries...</p>}
                 {treasuryError && <p className="text-red-500 text-xs">{treasuryError}</p>}
                 {errors.treasury && <p className="text-red-500 text-xs">{errors.treasury.message}</p>}
               </div>
             </div>
           </div>
-          <Button disabled={isSubmitting} type="submit" className="py-5 w-full mt-4">
-            {isSubmitting ? 'Loading...' : 'Submit'}
+          <Button type="submit" disabled={isSubmitting} className='mt-4 w-full'>
+            {isSubmitting ? 'Submitting...' : 'Submit'}
           </Button>
-          {/* General Form Error */}
           {errors.root?.message && <p className="text-red-500 text-xs mt-2">{errors.root.message}</p>}
           <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
