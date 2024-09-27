@@ -88,12 +88,11 @@ const SignUp = () => {
         setVendorLoading
       );
       if (error) {
-        setVendorError(error);
         console.error('Error fetching vendor data:', error);
       } else {
         setVendorData(data);
-        setVendorError(error);
       }
+      setVendorError(error);
     }
   };
 
@@ -104,12 +103,11 @@ const SignUp = () => {
         setTreasuryLoading
       );
       if (error) {
-        setTreasuryError(error);
         console.error('Error fetching treasury data:', error);
       } else {
         setTreasuryData(data);
-        setTreasuryError(error);
       }
+      setTreasuryError(error);
     }
   };
 
