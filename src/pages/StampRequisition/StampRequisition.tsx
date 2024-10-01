@@ -29,7 +29,6 @@ const StampRequisition = () => {
   const [denominationLoading, setDenominationLoading] = useState(false);
   const [denominations, setdenominations] = useState<Denomination[] | null>(null);
   const [denominationError, setDenominationError] = useState<string | null>(null);
-  // const [categoryValue, setCategoryValue] = useState<string>
 
   const handleCategoryDropdown = async () => {
     if (!categories) {
@@ -76,6 +75,9 @@ const StampRequisition = () => {
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
               <SelectContent>
+                {categoryLoading ? <p className="text-sm">Loading categories...</p> : (categoryError && <p className="text-red-500 text-xs">{categoryError}</p>)}
+                {/* {categoryLoading && <p className="text-sm">Loading categories...</p>} */}
+                {/* {categoryError && <p className="text-red-500 text-xs">{categoryError}</p>} */}
                 {categories?.map((category) => (
                   <SelectItem key={category.stampCategoryId} value={String(category.stampCategoryId)}>
                     {category.stampCategory}
@@ -83,8 +85,6 @@ const StampRequisition = () => {
                 ))}
               </SelectContent>
             </Select>
-            {categoryLoading && <p className="text-sm">Loading categories...</p>}
-            {categoryError && <p className="text-red-500 text-xs">{categoryError}</p>}
           </div>
           <div className='flex-1'>
             <Label htmlFor="denomination" className="block text-gray-600 font-medium mb-2">Select Denomination</Label>
@@ -92,6 +92,9 @@ const StampRequisition = () => {
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select Denomination" />
               </SelectTrigger>
+              {denominationLoading ? <p className="text-sm">Loading denominations...</p> : (denominationError && <p className="text-red-500 text-xs">{denominationError}</p>)}
+              {/* {denominationLoading && <p className="text-sm">Loading denominations...</p>} */}
+              {/* {denominationError && <p className="text-red-500 text-xs">{denominationError}</p>} */}
               <SelectContent>
                 {denominations && denominations.length > 0 ? (
                   denominations.map((denomination) => (
@@ -104,8 +107,6 @@ const StampRequisition = () => {
                 )}
               </SelectContent>
             </Select>
-            {denominationLoading && <p className="text-sm">Loading denominations...</p>}
-            {denominationError && <p className="text-red-500 text-xs">{denominationError}</p>}
           </div>
           <div className='flex-1'>
             <Label htmlFor="quantity" className="block text-gray-600 font-medium mb-2">Quantity</Label>
