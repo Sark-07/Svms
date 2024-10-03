@@ -24,7 +24,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { ApiResponse, Treasury, VendorType } from '@/types/types';
 import { formatDate } from '@/utils/formatDate';
-import fetchData from '@/utils/fetcher';
+import {fetchData} from '@/utils/fetcher';
 
 // Zod schema for form validation including file validation
 const vendorDetailsSchema = z.object({

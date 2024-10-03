@@ -20,8 +20,6 @@ const Sidebar = () => {
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
         {
           sidebarItems.map((item: MenuItems) => {
-            console.log(item.routeTo === location.pathname);
-            
             return <TooltipProvider key={item.id}>
                     <Tooltip>
                       <TooltipTrigger asChild>
