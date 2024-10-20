@@ -1,4 +1,3 @@
-
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import {
@@ -18,11 +17,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Loader2, Trash2 } from "lucide-react"
-import { Category, Combination, Denomination, StampRequisitionItem } from '@/types/types'
+import { Category, Combination, Denomination, StampRequisitionItem, StampRequisitionPayload } from '@/types/types'
 import { useState } from 'react'
-import { fetchData } from '@/utils/fetcher'
+import { fetchData, postData } from '@/utils/fetcher'
 import { toast } from 'react-toastify'
-import { log } from 'console'
+import Summary from './Summary'
 const StampRequisition = () => {
   const [categoryLoading, setCategoryLoading] = useState(false);
   const [categories, setCategories] = useState<Category[] | null>(null);
@@ -36,7 +35,6 @@ const StampRequisition = () => {
   const [categoryId, setCategoryId] = useState<number>(0)
   const [denominationId, setDenominationId] = useState<number>(-1)
   const [quantity, setQuantity] = useState<number>(0)
-  const [combinationId, setCombinationId] = useState<number>(-1)
   const [value, setValue] = useState<number>(0);
   const [discount, setDiscount] = useState<number>(0);
   const [discountedAmount, setDiscountedAmount] = useState<number>(0);
@@ -47,6 +45,7 @@ const StampRequisition = () => {
   const [totalTaxAmount, setTotalTaxAmount] = useState<number>(0);
   const [totalNetAmount, setTotalNetAmount] = useState<number>(0);
   const [tableData, setTableData] = useState<StampRequisitionItem[]>([])
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const handleCategoryDropdown = async () => {
     if (!categories) {
       const { data, error } = await fetchData<Category>(
@@ -78,11 +77,12 @@ const StampRequisition = () => {
   const getCombinationIdFromCategoryIdAndDenominationId = async (categoryId: number, denominationId: number) => {
     const { data, error } = await fetchData<Combination>(
       `${import.meta.env.VITE_SERVER_URL}StampMaster/GetCombinationIdFromCategoryDenominationLabel?categoryId=${categoryId}&denominationId=${denominationId}`);
-    console.log(data);
     if (error) {
-      toast.error(error)
+      toast.error(error);
     } else {
-      data ? setCombinationId(data.stampCombinationId) : setCombinationId(-1)
+      if (data) {
+        return { combinationId: data.stampCombinationId, noLabelPerSheet: data.noLabelPerSheet }
+      }
     }
   };
 
@@ -98,48 +98,104 @@ const StampRequisition = () => {
   }
 
   const handleQuantityChange = (quantity: number) => {
-    setQuantity(quantity);
-    const currentValue = parseFloat((quantity * denomination).toFixed(3));
-    setValue(currentValue);
-    const currentDiscountedAmount = parseFloat((currentValue * (discount / 100)).toFixed(3));
-    setDiscountedAmount(currentDiscountedAmount);
-    const currentTax = parseFloat((currentDiscountedAmount * 0.1).toFixed(3));
-    setTax(currentTax);
-    setNetAmount(parseFloat((currentValue + currentTax - currentDiscountedAmount).toFixed(3)));
+    if (quantity < 1) {
+      toast.warn(`Quantity can not be less than 1`)
+      setQuantity(1)
+    } else {
+      setQuantity(quantity);
+      const currentValue = parseFloat((quantity * denomination).toFixed(3));
+      setValue(currentValue);
+      const currentDiscountedAmount = parseFloat((currentValue * (discount / 100)).toFixed(3));
+      setDiscountedAmount(currentDiscountedAmount);
+      const currentTax = parseFloat((currentDiscountedAmount * 0.1).toFixed(3));
+      setTax(currentTax);
+      setNetAmount(parseFloat((currentValue + currentTax - currentDiscountedAmount).toFixed(3)));
+    }
   }
 
-  const addItems = () => {
-    let flag = false
-    tableData.find((item) => {
-      if (item.denomination === denomination) {
-        flag = true
+  const addItems = async () => {
+    if (category && denomination) {
+      if (!quantity) {
+        toast.warn("Quantity should be at least 1")
+        return
       }
-    })
-    if (flag) {
-      toast.warn(`The selected denomination is already added for the category: ${category}`)
-      return
+      const isDenominationAdded = tableData.some(item => item.denomination === denomination);
+      if (isDenominationAdded) {
+        toast.warn(`The selected denomination is already added for the category: ${category}`);
+        return;
+      }
+      const { combinationId = 0, noLabelPerSheet = 0 } = await getCombinationIdFromCategoryIdAndDenominationId(categoryId, denominationId) || {};
+      const obj: StampRequisitionItem = {
+        combinationId: combinationId,
+        noLabelPerSheet: noLabelPerSheet,
+        category,
+        description,
+        denomination,
+        quantity,
+        value,
+        discountedAmount,
+        tax,
+        netAmount
+      };
+
+      // ------------------------------------- Total Summary ------------------------------------------
+      setTotalGrossAmount(prev => prev + value);
+      setTotalDiscountAmount(prev => prev + discountedAmount);
+      setTotalTaxAmount(prev => prev + tax);
+      setTotalNetAmount(prev => prev + netAmount);
+
+      // ------------------------------------- Reset ------------------------------------------
+      setTableData(prevTableData => [...prevTableData, obj]);
+      setQuantity(0);
+      setValue(0);
+      setDiscountedAmount(0);
+      setTax(0);
+      setNetAmount(0);
+    } else {
+      toast.warning("Please choose a category and denomination first")
     }
-    getCombinationIdFromCategoryIdAndDenominationId(categoryId, denominationId)
-    const obj: StampRequisitionItem = {
-      combinationId,
-      category,
-      description,
-      denomination,
-      value,
-      discount,
-      tax,
-      netAmount
-    }
-    setTableData([...tableData, obj])
-    setQuantity(0)
-    setValue(0)
-    setDiscount(0)
-    setTax(0)
-    setNetAmount(0)
   }
-const handleAction = (combinationId: number) => {
-  setTableData([...tableData.filter((item) => item.combinationId == combinationId)])
-}
+  const handleAction = (requisition: StampRequisitionItem) => {
+    setTableData(tableData.filter((item) => item.combinationId !== requisition.combinationId));
+    setTotalGrossAmount(prev => prev - requisition.value);
+    setTotalDiscountAmount(prev => prev - requisition.discountedAmount);
+    setTotalTaxAmount(prev => prev - requisition.tax);
+    setTotalNetAmount(prev => prev - requisition.netAmount);
+  }
+
+  const submitRequisition = async () => {
+    setIsSubmitting(true)
+    if (tableData.length > 0) {
+      const chilData = tableData.map((item) => {
+        return {
+          stampCombinationId: item.combinationId,
+          quantity: item.quantity,
+          labelPerSheet: item.noLabelPerSheet,
+          grossAmount: item.value,
+          netAmount: item.netAmount,
+          taxAmount: item.tax,
+          discountAmount: item.discountedAmount
+        }
+      })
+      const payload: StampRequisitionPayload = {
+        vendorId: 1227,
+        totalGrossAmount,
+        totalDiscountAmount,
+        totalTaxAmount,
+        totalNetAmount,
+        childData: chilData
+      }
+      const { data, error } = await postData(`${import.meta.env.VITE_SERVER_URL}StampRequisition/CreateStampRequisition`, setIsSubmitting, payload)
+      if (error) {
+        toast.error(error)
+      } else {
+        toast.success(data.message);
+      }
+    } else {
+      toast.warn("No Items Added")
+    }
+    setIsSubmitting(false)
+  }
 
   return (
     <div className='w-full h-full md:px-8 py-4 flex flex-col gap-4'>
@@ -150,7 +206,7 @@ const handleAction = (combinationId: number) => {
         <div className="flex gap-4 items-end">
           <div className='flex-1'>
             <Label htmlFor="category" className="block text-gray-600 font-medium mb-2">Select Category</Label>
-            <Select disabled={tableData.length > 0 && true} onOpenChange={handleCategoryDropdown} onValueChange={(value) => {
+            <Select disabled={tableData.length > 0} onOpenChange={handleCategoryDropdown} onValueChange={(value) => {
               setCategoryId(JSON.parse(value).categoryId)
               setCategory(JSON.parse(value).category)
               setDescription(JSON.parse(value).description)
@@ -174,7 +230,12 @@ const handleAction = (combinationId: number) => {
             <Select onValueChange={(value) => {
               setDenominationId(JSON.parse(value).denominationId)
               setDenomination(JSON.parse(value).denomination)
-              getDiscount(categoryId, denomination)
+              getDiscount(categoryId, JSON.parse(value).denomination)
+              setValue(0)
+              setQuantity(0)
+              setDiscountedAmount(0)
+              setTax(0)
+              setNetAmount(0)
             }}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select Denomination" />
@@ -195,7 +256,7 @@ const handleAction = (combinationId: number) => {
           </div>
           <div className='flex-1'>
             <Label htmlFor="quantity" className="block text-gray-600 font-medium mb-2">Quantity</Label>
-            <Input type="number" id="quantity" className="w-full px-3 py-2 border rounded-md" placeholder='Eg: 500' onChange={(e) => handleQuantityChange(Number(e.target.value))} />
+            <Input type="number" id="quantity" className="w-full px-3 py-2 border rounded-md" placeholder='Eg: 500' value={quantity} onChange={(e) => handleQuantityChange(Number(e.target.value))} />
           </div>
           <div className='flex-1'>
             <Label htmlFor="value" className="block text-gray-600 font-medium mb-2">Value</Label>
@@ -219,13 +280,13 @@ const handleAction = (combinationId: number) => {
         </div>
         <div className='w-full border rounded '>
           <Table>
-            {/* <TableCaption>A list of your recent invoices.</TableCaption> */}
             <TableHeader className='bg-gray-100 h-12'>
               <TableRow>
                 <TableHead className="w-[100px]">Serial No</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Denomination</TableHead>
+                <TableHead>Quantity</TableHead>
                 <TableHead>Value</TableHead>
                 <TableHead>Discount</TableHead>
                 <TableHead>Tax</TableHead>
@@ -243,11 +304,12 @@ const handleAction = (combinationId: number) => {
                         <TableCell>{item.category}</TableCell>
                         <TableCell>{item.description}</TableCell>
                         <TableCell>{item.denomination}</TableCell>
+                        <TableCell>{item.quantity}</TableCell>
                         <TableCell>{item.value}</TableCell>
-                        <TableCell>{item.discount}</TableCell>
+                        <TableCell>{item.discountedAmount}</TableCell>
                         <TableCell>{item.tax}</TableCell>
                         <TableCell>{item.netAmount}</TableCell>
-                        <TableCell><Button onClick={() => handleAction(item.combinationId)}><Trash2 /></Button></TableCell>
+                        <TableCell><Button onClick={() => handleAction(item)}><Trash2 /></Button></TableCell>
                       </TableRow>
                     )
                   })
@@ -256,33 +318,22 @@ const handleAction = (combinationId: number) => {
             </TableBody>
           </Table>
         </div>
-        <div className='flex flex-col gap-4 w-full justify-start'>
-          <h1 className='font-bold text-2xl'>Summary</h1>
-          <div>
-            <div className="flex gap-4 items-end w-full">
-              <div className='flex-1'>
-                <Label htmlFor="total-gross-amount" className="block text-gray-600 font-medium mb-2">Total Gross Amount</Label>
-                <Input type='number' value={totalGrossAmount} id="total-gross-amount" className="w-full px-3 py-4 border rounded-md" disabled />
-              </div>
-              <div className='flex-1'>
-                <Label htmlFor="total-discount-amount" className="block text-gray-600 font-medium mb-2">Total Discount Amount</Label>
-                <Input type='number' value={totalDiscountAmount} id="total-discount-amount" className="w-full px-3 py-4 border rounded-md" disabled />
-              </div>
-              <div className='flex-1'>
-                <Label htmlFor="total-tax-amount" className="block text-gray-600 font-medium mb-2">Total Tax Amount</Label>
-                <Input type="number" value={totalTaxAmount} id="total-tax-amount" className="w-full px-3 py-4 border rounded-md" disabled />
-              </div>
-              <div className='flex-1'>
-                <Label htmlFor="total-net-amount" className="block text-gray-600 font-medium mb-2">Total Net Amount</Label>
-                <Input type="number" value={totalNetAmount} id="total-net-amount" className="w-full px-3 py-4 border rounded-md" disabled />
-              </div>
-            </div>
-          </div>
-        </div>
+        <Summary
+          totalGrossAmount={totalGrossAmount}
+          totalDiscountAmount={totalDiscountAmount}
+          totalTaxAmount={totalTaxAmount}
+          totalNetAmount={totalNetAmount}
+        />
         <div className='w-full flex justify-end'>
-          <Button disabled>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Please wait
+          <Button disabled={isSubmitting} onClick={submitRequisition}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Please wait
+              </>
+            ) : (
+              'Submit'
+            )}
           </Button>
         </div>
       </div>

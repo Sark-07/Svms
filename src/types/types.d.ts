@@ -37,11 +37,32 @@ export type Combination = {
 }
 export type StampRequisitionItem = {
   combinationId: number;
+  noLabelPerSheet: number
   category: string;
   description: string;
   denomination: number;
+  quantity: number
   value: number;
-  discount: number;
+  discountedAmount: number;
   tax: number;
   netAmount: number;
+}
+
+interface ChildData {
+  stampCombinationId: number;
+  quantity: number;
+  labelPerSheet: number;
+  grossAmount: number;
+  netAmount: number;
+  taxAmount: number;
+  discountAmount: number;
+}
+
+export type StampRequisitionPayload = {
+  vendorId: number;
+  totalGrossAmount: number;
+  totalNetAmount: number;
+  totalTaxAmount: number;
+  totalDiscountAmount: number;
+  childData: ChildData[];
 }

@@ -257,6 +257,7 @@ const SignUp = () => {
                     <SelectValue placeholder="Select Vendor Type" />
                   </SelectTrigger>
                   <SelectContent>
+                {vendorLoading ? <p className="text-sm">Loading vendor types...</p> : (vendorError && <p className="text-red-500 text-xs">{vendorError}</p>)}
                     {vendorData?.map((vendorType) => (
                       <SelectItem key={vendorType.stampVendorId} value={String(vendorType.stampVendorId)}>
                         {vendorType.description}
@@ -264,8 +265,6 @@ const SignUp = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                {vendorLoading && <p className="text-sm">Loading vendor types...</p>}
-                {vendorError && <p className="text-red-500 text-xs">{vendorError}</p>}
                 {errors.vendorType && <p className="text-red-500 text-xs">{errors.vendorType.message}</p>}
               </div>
 
@@ -276,6 +275,7 @@ const SignUp = () => {
                     <SelectValue placeholder="Select Treasury" />
                   </SelectTrigger>
                   <SelectContent>
+                  {treasuryLoading ? <p className="text-sm">Loading treasuries...</p> : (treasuryError && <p className="text-red-500 text-xs">{treasuryError}</p>)}
                     {treasuryData?.map((treasury) => (
                       <SelectItem key={treasury.code} value={String(treasury.code)}>
                         {treasury.name}
@@ -283,8 +283,6 @@ const SignUp = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                {treasuryLoading && <p className="text-sm">Loading treasuries...</p>}
-                {treasuryError && <p className="text-red-500 text-xs">{treasuryError}</p>}
                 {errors.treasury && <p className="text-red-500 text-xs">{errors.treasury.message}</p>}
               </div>
             </div>

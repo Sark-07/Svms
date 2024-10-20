@@ -35,7 +35,7 @@ export const fetchData = async <T,>(
   }
 };
 
-export const fetchDataPost = async <T,>(
+export const postData = async <T,>(
   url: string,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   payload: object,
@@ -56,7 +56,7 @@ export const fetchDataPost = async <T,>(
     if (response.data.apiResponseStatus === 1) {
       return { data: response.data.result, error: null };
     } else {
-      return { data: null, error: 'Failed to fetch data' };
+      return { data: null, error: response.data.message };
     }
   } catch (err: any) {
     setLoading(false); // Stop loading in case of an error
