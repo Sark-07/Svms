@@ -66,3 +66,37 @@ export type StampRequisitionPayload = {
   totalDiscountAmount: number;
   childData: ChildData[];
 }
+
+// src/types/RequisitionHistory.ts
+export type RequisitionHistory = {
+  id: number;
+  requisitionNo: string;
+  requisitionDate: string
+  vendorName: string;
+  vendorTypeId: number;
+  licenseNo: string;
+  grossAmount: number;
+  discountAmount: number;
+  taxAmount: number;
+  netAmount: number;
+  statusCode: number;
+  status: string;
+  childData: RequisitionHistoryChildData[];
+}
+
+export type RequisitionHistoryChildData = {
+  id: number;
+  stampCombinationId: number;
+  stampCategory: string;
+  description: string;
+  stampCategoryId: number;
+  denomination: number;
+  denominationId: number;
+  quantity: number;
+  labelPerSheet: number;
+  labelPerSheetId: number;
+  grossAmount: number;
+  netAmount: number;
+  taxAmount: number;
+  discountAmount: number;
+}

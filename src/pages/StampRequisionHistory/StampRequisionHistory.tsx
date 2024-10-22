@@ -4,11 +4,23 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { fetchDataWithPatch } from "@/utils/fetcher";
-
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
+import { RequisitionHistory } from "@/types/types";
+import { getStatusColor } from "@/utils/getStatusColor";
+import Modal from "@/components/ui/modal";
 const StampRequisionHistory = () => {
     const [startDate, setStartDate] = useState<string | null>(null);
     const [endDate, setEndDate] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [tableData, setTableData] = useState<RequisitionHistory[]>([])    //TODO: Put the type of requisition history
+
     const handleClick = async () => {
         if (!startDate || !endDate || new Date(startDate) > new Date(endDate)) {
             toast.warn("Start date must be earlier than end date.");
@@ -21,8 +33,7 @@ const StampRequisionHistory = () => {
             if (error) {
                 toast.error(error)
             } else {
-                console.log(data);
-                
+                setTableData(data.data)
             }
         }
     }
@@ -43,9 +54,48 @@ const StampRequisionHistory = () => {
                     </div>
                     <Button onClick={handleClick}>Submit</Button>
                 </div>
+                <div className='w-full border rounded '>
+                    <Table>
+                        <TableHeader className='bg-gray-100 h-12'>
+                            <TableRow>
+                                <TableHead className="w-[100px]">Serial No</TableHead>
+                                <TableHead>Requisition No</TableHead>
+                                <TableHead>Requisition Date</TableHead>
+                                <TableHead>Gross Amount</TableHead>
+                                <TableHead>Discount Amount</TableHead>
+                                <TableHead>Tax Amount</TableHead>
+                                <TableHead>Net Amount</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Action</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {
+                                tableData.length > 0 ? (
+                                    tableData.map((item, index: number) => {
+                                        return (
+                                            <TableRow className="h-12" key={item.id}>
+                                                <TableCell className="font-medium">{index + 1}</TableCell>
+                                                <TableCell>{item.requisitionNo}</TableCell>
+                                                <TableCell>{item.requisitionDate}</TableCell>
+                                                <TableCell>{item.grossAmount}</TableCell>
+                                                <TableCell>{item.discountAmount}</TableCell>
+                                                <TableCell>{item.taxAmount}</TableCell>
+                                                <TableCell>{item.netAmount}</TableCell>
+                                                <TableCell><span className={`${getStatusColor(item.statusCode)} py-1 px-2 rounded-sm`}>{item.status}</span></TableCell>
+                                                <TableCell className="flex gap-2">
+                                                    <Modal tableData={item.childData} reqNo={item.requisitionNo}/>
+                                                    {item.statusCode === 33 && <Button >Pay Now</Button>}
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })
+                                ) : <TableRow className="h-12"><TableCell className='font-medium text-xl text-center'>No Items</TableCell></TableRow>
+                            }
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
-
-
         </div>
     )
 }
