@@ -89,12 +89,8 @@ const Dashboard = () => {
                 </div>
                 <Tabs defaultValue="week">
                     <div className="flex items-center">
-                        <TabsList>
-                            <TabsTrigger value="week">Week</TabsTrigger>
-                            <TabsTrigger value="month">Month</TabsTrigger>
-                            <TabsTrigger value="year">Year</TabsTrigger>
-                        </TabsList>
-                        <div className="ml-auto flex items-center gap-2">
+                        <h1 className='text-2xl font-bold'>Recent Requisitions</h1>
+                        {/* <div className="ml-auto flex items-center gap-2">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button
@@ -128,14 +124,14 @@ const Dashboard = () => {
                                 <File className="h-3.5 w-3.5" />
                                 <span className="sr-only sm:not-sr-only">Export</span>
                             </Button>
-                        </div>
+                        </div> */}
                     </div>
                     <TabsContent value="week">
                         <Card x-chunk="dashboard-05-chunk-3">
                             <CardHeader className="px-7">
-                                <CardTitle>Orders</CardTitle>
+                                <CardTitle>Requisitions</CardTitle>
                                 <CardDescription>
-                                    Recent orders from your store.
+                                    Recent requisitions made by you.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>

@@ -8,6 +8,7 @@ import SignUp from './auth/SignUp'
 import Dashboard from './pages/Dashboard/Dashboard'
 import StampRequisition from './pages/StampRequisition/StampRequisition'
 import Home from './pages/Home/Home'
+import StampRequisionHistory from './pages/StampRequisionHistory/StampRequisionHistory'
 
 
 
@@ -20,6 +21,7 @@ const App = () => {
           <Route path="/dashboard" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="new-stamp-requisition" element={<StampRequisition />} />
+            <Route path="stamp-requisition-history" element={<StampRequisionHistory />} />
           </Route>
           <Route path="/auth" element={<Auth />}>
             <Route index element={<Login />} />

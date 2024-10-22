@@ -189,12 +189,16 @@ const StampRequisition = () => {
       if (error) {
         toast.error(error)
       } else {
-        toast.success(data.message);
+        toast.success(data?.message);
+        setTableData([])
+        setTotalNetAmount(0)
+        setTotalGrossAmount(0)
+        setTotalDiscountAmount(0)
+        setTotalTaxAmount(0)
       }
     } else {
       toast.warn("No Items Added")
     }
-    setIsSubmitting(false)
   }
 
   return (
