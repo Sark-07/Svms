@@ -46,8 +46,11 @@ const Login = () => {
         <Button type="submit" className="py-5 w-full">
           Login
         </Button>
+        <div className="flex gap-2 items-center">
+          <span className="h-[1px] flex-1 bg-neutral-200"></span>OR<span className="h-[1px] flex-1 bg-neutral-200"></span>
+        </div>
         <Button variant="outline" className="py-5 w-full">
-          Login with Google
+          Login with OTP
         </Button>
       </div>
       <div className="mt-4 text-center text-sm">

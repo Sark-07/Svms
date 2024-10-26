@@ -1,4 +1,4 @@
-import { CirclePlus, IndianRupee, LayoutDashboard, UserRound } from "lucide-react"
+import { CirclePlus, IndianRupee, LayoutDashboard, LucideHistory, UserRound } from "lucide-react"
 
 export interface MenuItems {
     id: number
@@ -10,28 +10,35 @@ export interface MenuItems {
 export const sidebarItems: MenuItems[] = [
     {
         id: 0,
-        icon: <LayoutDashboard/>,
+        icon: <LayoutDashboard />,
         title: 'Dashboard',
         tooltip: 'Dashboard',
         routeTo: '/dashboard'
     },
     {
         id: 1,
-        icon: <CirclePlus/>,
+        icon: <CirclePlus />,
         title: 'Stamp Requisition',
         tooltip: 'Stamp Requisition',
         routeTo: '/dashboard/new-stamp-requisition'
     },
     {
         id: 2,
-        icon: <IndianRupee/>,
+        icon: <LucideHistory />,
+        title: 'Requisition History',
+        tooltip: 'Requisition History',
+        routeTo: '/dashboard/stamp-requisition-history'
+    },
+    {
+        id: 3,
+        icon: <IndianRupee />,
         title: 'Payments',
         tooltip: 'Payments',
         routeTo: '/dashboard/payments'
     },
     {
-        id: 3,
-        icon: <UserRound/>,
+        id: 4,
+        icon: <UserRound />,
         title: 'Profile',
         tooltip: 'Profile',
         routeTo: '/dashboard/profile'
