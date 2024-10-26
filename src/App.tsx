@@ -16,14 +16,14 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/">
+        <Route path="https://svms-bgrm.vercel.app/">
           <Route index element={<Home />} />
-          <Route path="/dashboard" element={<Layout />}>
+          <Route path="https://svms-bgrm.vercel.app/dashboard" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="new-stamp-requisition" element={<StampRequisition />} />
             <Route path="stamp-requisition-history" element={<StampRequisionHistory />} />
           </Route>
-          <Route path="/auth" element={<Auth />}>
+          <Route path="https://svms-bgrm.vercel.app/auth" element={<Auth />}>
             <Route index element={<Login />} />
             <Route path="login" element={<Login />} />
             <Route path="signup" element={<SignUp />} />
