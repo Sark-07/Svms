@@ -20,7 +20,8 @@ const StampRequisionHistory = () => {
     const [endDate, setEndDate] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [tableData, setTableData] = useState<RequisitionHistory[]>([])    //TODO: Put the type of requisition history
-
+    console.log((isLoading));
+    
     const handleClick = async () => {
         if (!startDate || !endDate || new Date(startDate) > new Date(endDate)) {
             toast.warn("Start date must be earlier than end date.");
